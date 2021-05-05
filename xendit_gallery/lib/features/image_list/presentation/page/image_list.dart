@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:xendit_gallery/constants/colors.dart';
+import 'package:xendit_gallery/constants/strings.dart';
 import 'package:xendit_gallery/features/image_list/domain/usecases/get_image_list.dart';
 import 'package:xendit_gallery/features/image_list/presentation/cubit/image_list_cubit.dart';
 import 'package:shimmer/shimmer.dart';
@@ -44,6 +46,14 @@ class _ImageListState extends State<ImageList> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Images'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.download_sharp),
+            onPressed: () {
+              Navigator.pushNamed(context, IMAGE_DETAIL);
+            },
+          ),
+        ],
       ),
       body: BlocListener<ImageListCubit, ImageListState>(
         listener: (context, state) {
@@ -55,35 +65,41 @@ class _ImageListState extends State<ImageList> {
               return Center(child: CircularProgressIndicator());
             }
             if (imageListState is LoadedState) {
-              return GridView.builder(
-                controller: controller,
-                itemCount: imageListState.imageList.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 3,
-                  mainAxisSpacing: 3,
-                ),
-                itemBuilder: (BuildContext context, int index) {
-                  return GestureDetector(
-                    child: Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0),
-                      ),
-                      elevation: 8,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.all(Radius.circular(15.0)),
-                        child: CachedNetworkImage(
-                          fit: BoxFit.fill,
-                          imageUrl: imageListState.imageList[index].previewURL,
-                          placeholder: (context, url) => Shimmer(),
-                          errorWidget: (context, url, error) =>
-                              Icon(Icons.error),
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: GridView.builder(
+                  controller: controller,
+                  itemCount: imageListState.imageList.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 3,
+                    mainAxisSpacing: 3,
+                  ),
+                  itemBuilder: (BuildContext context, int index) {
+                    return GestureDetector(
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15.0),
+                        ),
+                        elevation: 8,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.all(Radius.circular(15.0)),
+                          child: CachedNetworkImage(
+                            fit: BoxFit.fill,
+                            imageUrl:
+                                imageListState.imageList[index].previewURL,
+                            placeholder: (context, url) => Shimmer(),
+                            errorWidget: (context, url, error) =>
+                                Icon(Icons.error),
+                          ),
                         ),
                       ),
-                    ),
-                    onTap: () {},
-                  );
-                },
+                      onTap: () {
+                        Navigator.pushNamed(context, IMAGE_DETAIL);
+                      },
+                    );
+                  },
+                ),
               );
             }
             return Container();

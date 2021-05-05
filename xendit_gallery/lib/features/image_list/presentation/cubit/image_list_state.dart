@@ -5,8 +5,6 @@ abstract class ImageListState {}
 
 class ImageListInitial extends ImageListState {}
 
-class LoadingState extends ImageListState {}
-
 class LoadedState extends ImageListState {
   final List<ImageModel> imageList;
 
