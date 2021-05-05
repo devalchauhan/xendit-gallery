@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:xendit_gallery/features/image_list/domain/usecases/get_image_list.dart';
 import 'package:xendit_gallery/features/image_list/presentation/cubit/image_list_cubit.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -10,10 +11,32 @@ class ImageList extends StatefulWidget {
 }
 
 class _ImageListState extends State<ImageList> {
+  ScrollController controller;
+  int pageIndex = 1;
   @override
   void initState() {
-    BlocProvider.of<ImageListCubit>(context).callGetImageList();
+    BlocProvider.of<ImageListCubit>(context)
+        .callGetImageList(PageParams(page: pageIndex.toString()));
+    controller = new ScrollController()..addListener(_scrollListener);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    controller.removeListener(_scrollListener);
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (controller.position.atEdge) {
+      if (controller.position.pixels == 0) {
+        // You're at the top.
+      } else {
+        pageIndex++;
+        BlocProvider.of<ImageListCubit>(context)
+            .callGetImageList(PageParams(page: pageIndex.toString()));
+      }
+    }
   }
 
   @override
@@ -28,16 +51,17 @@ class _ImageListState extends State<ImageList> {
         },
         child: BlocBuilder<ImageListCubit, ImageListState>(
           builder: (BuildContext context, ImageListState imageListState) {
-            if (imageListState is LoadingState) {
+            if (imageListState is ImageListInitial) {
               return Center(child: CircularProgressIndicator());
             }
             if (imageListState is LoadedState) {
               return GridView.builder(
+                controller: controller,
                 itemCount: imageListState.imageList.length,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 2,
-                  mainAxisSpacing: 2,
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 3,
+                  mainAxisSpacing: 3,
                 ),
                 itemBuilder: (BuildContext context, int index) {
                   return GestureDetector(

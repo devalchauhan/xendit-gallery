@@ -9,16 +9,15 @@ import 'package:xendit_gallery/core/networking/app_exception.dart';
 class ApiBaseHelper {
   final String _baseUrl = BASE_URL;
 
-  Future<dynamic> get() async {
+  Future<dynamic> get(String page) async {
     var responseJson;
     try {
-      final response = await http.get(Uri.parse(_baseUrl));
+      final response = await http.get(Uri.parse(_baseUrl + page));
       responseJson = _returnResponse(response);
     } on SocketException {
       print('No net');
       throw FetchDataException('No Internet connection');
     }
-    print('api get recieved!');
     return responseJson;
   }
 

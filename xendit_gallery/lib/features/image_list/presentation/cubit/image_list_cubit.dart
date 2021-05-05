@@ -12,9 +12,8 @@ class ImageListCubit extends Cubit<ImageListState> {
   NoParams noParams;
   ImageListCubit({this.getImageList}) : super(ImageListInitial());
 
-  void callGetImageList() async {
-    emit(LoadingState());
-    final downloadFailedOrSuccess = await getImageList(noParams);
+  void callGetImageList(PageParams params) async {
+    final downloadFailedOrSuccess = await getImageList(params);
     downloadFailedOrSuccess.fold(
       (l) {
         final failure = l as DownloadFailure;
