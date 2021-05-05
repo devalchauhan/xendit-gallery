@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:xendit_gallery/constants/colors.dart';
 import 'package:xendit_gallery/features/image_detail/presentation/cubit/image_detail_cubit.dart';
 import 'package:xendit_gallery/router.dart';
@@ -10,6 +11,9 @@ import 'injenction_container.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await di.init();
+  await FlutterDownloader.initialize(
+      debug: true // optional: set false to disable printing logs to console
+      );
   runApp(MultiBlocProvider(
     providers: [
       BlocProvider(create: (context) => sl<ImageListCubit>()),

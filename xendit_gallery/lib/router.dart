@@ -13,7 +13,11 @@ class AppRouter {
       case IMAGE_DETAIL:
         return MaterialPageRoute(builder: (_) => ImageDetail());
       case IMAGE_BROWSER:
-        return MaterialPageRoute(builder: (_) => ImageBrowser());
+        final imagePath = routeSettings.arguments;
+        return MaterialPageRoute(
+            builder: (_) => ImageBrowser(
+                  imagePath: imagePath,
+                ));
       default:
         return null;
     }

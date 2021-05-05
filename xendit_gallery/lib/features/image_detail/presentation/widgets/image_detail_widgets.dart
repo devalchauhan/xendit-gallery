@@ -1,5 +1,10 @@
+import 'dart:convert';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:xendit_gallery/constants/colors.dart';
 import 'package:xendit_gallery/constants/strings.dart';
 import 'package:xendit_gallery/constants/text_styles.dart';
@@ -23,11 +28,12 @@ class SectionHeader extends StatelessWidget {
 }
 
 class SectionRow extends StatelessWidget {
-  dynamic element;
+  DownloadTask element;
   SectionRow({@required this.element});
   List _popUpItems = ['Delete', 'Cancel'];
   @override
   Widget build(BuildContext context) {
+    final headerData = jsonDecode(element.headers);
     return GestureDetector(
       child: Container(
         height: 120,
@@ -44,10 +50,13 @@ class SectionRow extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 20),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
-                  child: Image.asset(
-                    'assets/images/default.png',
-                    height: 80.0,
-                    width: 80.0,
+                  child: CachedNetworkImage(
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.fill,
+                    imageUrl: headerData['previewURL'],
+                    placeholder: (context, url) => Shimmer(),
+                    errorWidget: (context, url, error) => Icon(Icons.error),
                   ),
                 ),
               ),
@@ -58,7 +67,7 @@ class SectionRow extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Name',
+                      headerData['imageId'],
                       style: kGroupTitleTextStyle,
                     ),
                     Container(
@@ -107,7 +116,8 @@ class SectionRow extends StatelessWidget {
         ),
       ),
       onTap: () {
-        Navigator.pushNamed(context, IMAGE_BROWSER);
+        Navigator.pushNamed(context, IMAGE_BROWSER,
+            arguments: element.savedDir + '/' + element.filename);
       },
     );
   }

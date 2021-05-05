@@ -7,7 +7,7 @@ abstract class ImageDetailState {
 class ImageDetailInitial extends ImageDetailState {}
 
 class LoadedState extends ImageDetailState {
-  final List<ImageDetailModel> imageDetailList;
+  final List<DownloadTask> imageDetailList;
 
   LoadedState({@required this.imageDetailList});
   @override

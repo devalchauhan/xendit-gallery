@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 class ImageBrowser extends StatelessWidget {
+  final String imagePath;
+  ImageBrowser({@required this.imagePath});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -13,12 +17,7 @@ class ImageBrowser extends StatelessWidget {
           },
         ),
       ),
-      body: Container(
-        child: Image.asset(
-          'assets/images/default.png',
-          fit: BoxFit.fill,
-        ),
-      ),
+      body: Center(child: Image.file(File(imagePath))),
     );
   }
 }

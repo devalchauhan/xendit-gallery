@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:xendit_gallery/constants/strings.dart';
 import 'package:xendit_gallery/features/image_list/domain/usecases/get_image_list.dart';
 import 'package:xendit_gallery/features/image_list/presentation/cubit/image_list_cubit.dart';
@@ -91,7 +95,22 @@ class _ImageListState extends State<ImageList> {
                           ),
                         ),
                       ),
-                      onTap: () {
+                      onTap: () async {
+                        Directory appDocDir =
+                            await getApplicationDocumentsDirectory();
+                        String appDocPath = appDocDir.path;
+                        final taskId = await FlutterDownloader.enqueue(
+                          url: imageListState.imageList[index].largeImageURL,
+                          headers: {
+                            "previewURL":
+                                imageListState.imageList[index].previewURL,
+                            "imageId":
+                                imageListState.imageList[index].id.toString()
+                          },
+                          savedDir: appDocPath,
+                          showNotification: true,
+                          openFileFromNotification: true,
+                        );
                         Navigator.pushNamed(context, IMAGE_DETAIL);
                       },
                     );
