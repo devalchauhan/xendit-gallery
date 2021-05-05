@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:xendit_gallery/constants/colors.dart';
 import 'package:xendit_gallery/constants/strings.dart';
 import 'package:xendit_gallery/features/image_list/domain/usecases/get_image_list.dart';
 import 'package:xendit_gallery/features/image_list/presentation/cubit/image_list_cubit.dart';
