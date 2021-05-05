@@ -56,9 +56,7 @@ class _ImageListState extends State<ImageList> {
         ],
       ),
       body: BlocListener<ImageListCubit, ImageListState>(
-        listener: (context, state) {
-          if (state is ImageListInitial) {}
-        },
+        listener: (context, state) {},
         child: BlocBuilder<ImageListCubit, ImageListState>(
           builder: (BuildContext context, ImageListState imageListState) {
             if (imageListState is ImageListInitial) {

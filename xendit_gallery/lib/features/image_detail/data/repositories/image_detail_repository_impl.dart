@@ -1,15 +1,20 @@
 import 'package:dartz/dartz.dart';
 import 'package:xendit_gallery/core/error/failures/failure.dart';
 import 'package:xendit_gallery/features/image_detail/data/datasource/image_detail_datasource.dart';
-import 'package:xendit_gallery/features/image_detail/domain/entities/image_detail.dart';
+import 'package:xendit_gallery/features/image_detail/data/model/image_detail_model.dart';
 import 'package:xendit_gallery/features/image_detail/domain/repository/image_detail_repository.dart';
 
 class ImageDetailRepositoryImpl implements ImageDetailRepository {
   ImageDetailDatasource imageDetailDatasource;
   ImageDetailRepositoryImpl({this.imageDetailDatasource});
   @override
-  Future<Either<Failure, List<ImageDetailEntity>>> getImageDetail() {
-    // TODO: implement getImageDetail
-    throw UnimplementedError();
+  Future<Either<Failure, List<ImageDetailModel>>> getImageDetail() async {
+    try {
+      final List<ImageDetailModel> _images =
+          await imageDetailDatasource.getImageDetail();
+      return Right(_images);
+    } catch (e) {
+      return Left(DownloadFailure(error: e.error));
+    }
   }
 }

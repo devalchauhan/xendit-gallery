@@ -1,14 +1,20 @@
-import 'package:xendit_gallery/features/image_detail/data/repositories/image_detail_repository_impl.dart';
-import 'package:xendit_gallery/features/image_detail/domain/entities/image_detail.dart';
+import 'package:xendit_gallery/core/error/exceptions/exceptions.dart';
+import 'package:xendit_gallery/features/image_detail/data/model/image_detail_model.dart';
 
 abstract class ImageDetailDatasource {
-  Future<List<ImageDetailEntity>> getImageDetail();
+  Future<List<ImageDetailModel>> getImageDetail();
 }
 
 class ImageDetailDatasourceImpl implements ImageDetailDatasource {
+  List<ImageDetailModel> allImages = [];
   @override
-  Future<List<ImageDetailEntity>> getImageDetail() {
-    // TODO: implement getImageDetail
-    throw UnimplementedError();
+  Future<List<ImageDetailModel>> getImageDetail() {
+    try {
+      print('call local db');
+      // call local db here
+      return Future.value(allImages);
+    } catch (e) {
+      throw DownloadException(error: e.toString());
+    }
   }
 }

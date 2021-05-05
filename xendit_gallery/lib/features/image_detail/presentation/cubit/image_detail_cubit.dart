@@ -10,15 +10,15 @@ part 'image_detail_state.dart';
 class ImageDetailCubit extends Cubit<ImageDetailState> {
   GetImageDetail getImageDetail;
   ImageDetailCubit({this.getImageDetail}) : super(ImageDetailInitial());
-}
 
-void callGetImageDetailList(NoParams params) async {
-  /*final downloadFailedOrSuccess = await getImageDetail();
-  downloadFailedOrSuccess.fold(
-    (l) {
-      final failure = l as DownloadFailure;
-      emit(LoadingErrorState(error: failure.error));
-    },
-    (r) => emit(LoadedState(imageDetailList: r)),
-  );*/
+  void callGetImageDetailList(NoParams params) async {
+    final downloadFailedOrSuccess = await getImageDetail(params);
+    downloadFailedOrSuccess.fold(
+      (l) {
+        final failure = l as DownloadFailure;
+        emit(LoadingErrorState(error: failure.error));
+      },
+      (r) => emit(LoadedState(imageDetailList: r)),
+    );
+  }
 }
