@@ -8,7 +8,7 @@ class ImageListInitial extends ImageListState {}
 class LoadingState extends ImageListState {}
 
 class LoadedState extends ImageListState {
-  final List<NetImage> imageList;
+  final List<ImageModel> imageList;
 
   LoadedState({@required this.imageList});
 

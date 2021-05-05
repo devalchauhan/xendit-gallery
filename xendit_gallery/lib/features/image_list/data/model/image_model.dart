@@ -2,14 +2,14 @@ import 'package:flutter/foundation.dart';
 import 'package:xendit_gallery/features/image_list/domain/entities/image.dart';
 
 class AllImages {
-  List<ImageModel> allImages;
+  List<ImageModel> allImages = [];
   AllImages({this.allImages});
 
   AllImages.fromJson(Map<String, dynamic> json) {
     if (json['hits'] != null) {
-      print(json['hits']);
       json['hits'].forEach((v) {
-        allImages.add(ImageModel.fromJson(v));
+        ImageModel imageModel = ImageModel.fromJson(v);
+        allImages.add(imageModel);
       });
     }
   }

@@ -15,7 +15,8 @@ class ImageListRemoteDatasourceImpl implements ImageListRemoteDatasource {
       final response = await _helper.get();
       return Future.value(AllImages.fromJson(response).allImages);
     } catch (e) {
-      throw DownloadException(error: e.error);
+      print('deval ${e.toString()}');
+      throw DownloadException(error: e.toString());
     }
   }
 }
