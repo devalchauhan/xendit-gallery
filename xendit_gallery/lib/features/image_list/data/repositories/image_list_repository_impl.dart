@@ -8,8 +8,13 @@ class ImageListRepositoryImpl implements ImageListRepository {
   ImageListRemoteDatasource imageListRemoteDatasource;
   ImageListRepositoryImpl({this.imageListRemoteDatasource});
   @override
-  Future<Either<Failure, List<NetImage>>> getImageList() {
-    // TODO: implement getImageList
-    throw UnimplementedError();
+  Future<Either<Failure, List<NetImage>>> getImageList() async {
+    try {
+      final List<NetImage> _images =
+          await imageListRemoteDatasource.getImageList();
+      return Right(_images);
+    } catch (e) {
+      return Left(DownloadFailure(error: e.error));
+    }
   }
 }

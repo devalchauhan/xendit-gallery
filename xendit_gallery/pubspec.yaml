@@ -17,6 +17,9 @@ dependencies:
   equatable: ^2.0.0
   flutter_bloc: ^7.0.0
   get_it: ^6.1.1
+  http: ^0.13.3
+  cached_network_image: ^3.0.0
+  shimmer: ^2.0.0
 
 
 dev_dependencies:

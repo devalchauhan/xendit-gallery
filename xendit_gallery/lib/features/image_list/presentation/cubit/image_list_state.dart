@@ -1,10 +1,22 @@
 part of 'image_list_cubit.dart';
 
-abstract class ImageListState extends Equatable {
-  const ImageListState();
+@immutable
+abstract class ImageListState {}
+
+class ImageListInitial extends ImageListState {}
+
+class LoadingState extends ImageListState {}
+
+class LoadedState extends ImageListState {
+  final List<NetImage> imageList;
+
+  LoadedState({@required this.imageList});
+
+  @override
+  List<Object> get props => [imageList];
 }
 
-class ImageListInitial extends ImageListState {
-  @override
-  List<Object> get props => [];
+class LoadingErrorState extends ImageListState {
+  final String error;
+  LoadingErrorState({this.error});
 }

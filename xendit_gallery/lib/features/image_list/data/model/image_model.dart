@@ -1,9 +1,23 @@
 import 'package:flutter/foundation.dart';
 import 'package:xendit_gallery/features/image_list/domain/entities/image.dart';
 
+class AllImages {
+  List<ImageModel> allImages;
+  AllImages({this.allImages});
+
+  AllImages.fromJson(Map<String, dynamic> json) {
+    if (json['hits'] != null) {
+      print(json['hits']);
+      json['hits'].forEach((v) {
+        allImages.add(ImageModel.fromJson(v));
+      });
+    }
+  }
+}
+
 class ImageModel extends NetImage {
   ImageModel(
-      {@required String id,
+      {@required int id,
       @required String previewURL,
       @required String largeImageURL})
       : super(id: id, previewURL: previewURL, largeImageURL: largeImageURL);
@@ -17,11 +31,10 @@ class ImageModel extends NetImage {
   }
 
   factory ImageModel.fromJson(Map<String, dynamic> json) {
-    final data = json['hits'];
     return ImageModel(
-      id: data['id'],
-      previewURL: data['previewURL'],
-      largeImageURL: data['largeImageURL'],
+      id: json['id'],
+      previewURL: json['previewURL'],
+      largeImageURL: json['largeImageURL'],
     );
   }
 }
