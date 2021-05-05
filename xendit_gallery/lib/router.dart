@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:xendit_gallery/features/image_browser/presentation/pages/image_browser.dart';
 import 'package:xendit_gallery/features/image_detail/presentation/page/image_detail.dart';
 import 'package:xendit_gallery/features/image_list/presentation/page/image_list.dart';
 
@@ -11,6 +12,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => ImageList());
       case IMAGE_DETAIL:
         return MaterialPageRoute(builder: (_) => ImageDetail());
+      case IMAGE_BROWSER:
+        return MaterialPageRoute(builder: (_) => ImageBrowser());
       default:
         return null;
     }
