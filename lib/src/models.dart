@@ -45,14 +45,14 @@ class DownloadTaskStatus {
 /// * [timeCreated] milliseconds since the Unix epoch (midnight, January 1, 1970 UTC)
 ///
 class DownloadTask {
-  final String taskId;
-  final DownloadTaskStatus status;
-  final int progress;
-  final String url;
-  final String filename;
-  final String savedDir;
-  final int timeCreated;
-  final String headers;
+   String taskId;
+   DownloadTaskStatus status;
+   int progress;
+   String url;
+   String filename;
+   String savedDir;
+   int timeCreated;
+   String headers;
 
   DownloadTask(
       {required this.taskId,

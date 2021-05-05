@@ -22,4 +22,13 @@ class ImageListCubit extends Cubit<ImageListState> {
       (r) => emit(LoadedState(imageList: r)),
     );
   }
+
+  void callRefresh(NoParams noParams) {
+    if (state is LoadedState) {
+      print('deval old$state');
+      LoadedState loadedState = state as LoadedState;
+      print('deval ${loadedState.imageList}');
+      emit(LoadedState(imageList: loadedState.imageList));
+    }
+  }
 }

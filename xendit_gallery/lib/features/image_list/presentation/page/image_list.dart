@@ -1,11 +1,14 @@
+import 'dart:convert';
 import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:xendit_gallery/constants/colors.dart';
 import 'package:xendit_gallery/constants/strings.dart';
+import 'package:xendit_gallery/features/image_list/data/model/image_model.dart';
 import 'package:xendit_gallery/features/image_list/domain/usecases/get_image_list.dart';
 import 'package:xendit_gallery/features/image_list/presentation/cubit/image_list_cubit.dart';
 import 'package:shimmer/shimmer.dart';
@@ -18,12 +21,36 @@ class ImageList extends StatefulWidget {
 class _ImageListState extends State<ImageList> {
   ScrollController controller;
   int pageIndex = 1;
+  List<DownloadTask> tasks = [];
   @override
   void initState() {
     BlocProvider.of<ImageListCubit>(context)
         .callGetImageList(PageParams(page: pageIndex.toString()));
     controller = new ScrollController()..addListener(_scrollListener);
+    getLocalImages();
+    _checkPermission();
     super.initState();
+  }
+
+  Future<bool> _checkPermission() async {
+    if (Platform.isAndroid) {
+      final status = await Permission.storage.status;
+      if (status != PermissionStatus.granted) {
+        final result = await Permission.storage.request();
+        if (result == PermissionStatus.granted) {
+          return true;
+        }
+      } else {
+        return true;
+      }
+    } else {
+      return true;
+    }
+    return false;
+  }
+
+  void getLocalImages() async {
+    tasks = await FlutterDownloader.loadTasks();
   }
 
   @override
@@ -44,6 +71,21 @@ class _ImageListState extends State<ImageList> {
     }
   }
 
+  CheckDownloadStatus isDownloaded(String id) {
+    dynamic condition = tasks.singleWhere((element) {
+      final headers = jsonDecode(element.headers);
+      return headers['imageId'] == id;
+    }, orElse: () => null);
+    if ((condition) != null) {
+      return CheckDownloadStatus(
+          isDownloaded: true,
+          filePath: condition.savedDir + '/' + condition.filename);
+    } else {
+      return CheckDownloadStatus(isDownloaded: false, filePath: '');
+    }
+  }
+
+  String localFilePath(String id) {}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,42 +119,68 @@ class _ImageListState extends State<ImageList> {
                     mainAxisSpacing: 3,
                   ),
                   itemBuilder: (BuildContext context, int index) {
-                    return GestureDetector(
-                      child: Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15.0),
+                    ImageModel imageModel = imageListState.imageList[index];
+                    return Stack(
+                      children: [
+                        GestureDetector(
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15.0),
+                            ),
+                            elevation: 8,
+                            child: ClipRRect(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(15.0)),
+                              child: CachedNetworkImage(
+                                height: 200,
+                                width: 200,
+                                fit: BoxFit.fill,
+                                imageUrl: imageModel.previewURL,
+                                placeholder: (context, url) => Shimmer(),
+                                errorWidget: (context, url, error) =>
+                                    Icon(Icons.error),
+                              ),
+                            ),
+                          ),
+                          onTap: () async {
+                            if (isDownloaded(imageModel.id.toString())
+                                .isDownloaded) {
+                              Navigator.pushNamed(context, IMAGE_BROWSER,
+                                  arguments:
+                                      isDownloaded(imageModel.id.toString())
+                                          .filePath);
+                            } else {
+                              Directory appDocDir =
+                                  await getApplicationDocumentsDirectory();
+                              String appDocPath = appDocDir.path;
+                              await FlutterDownloader.enqueue(
+                                url: imageModel.largeImageURL,
+                                headers: {
+                                  "previewURL": imageModel.previewURL,
+                                  "imageId": imageModel.id.toString()
+                                },
+                                savedDir: appDocPath,
+                                showNotification: false,
+                                openFileFromNotification: false,
+                              );
+                              Navigator.pushNamed(context, IMAGE_DETAIL);
+                            }
+                          },
                         ),
-                        elevation: 8,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.all(Radius.circular(15.0)),
-                          child: CachedNetworkImage(
-                            fit: BoxFit.fill,
-                            imageUrl:
-                                imageListState.imageList[index].previewURL,
-                            placeholder: (context, url) => Shimmer(),
-                            errorWidget: (context, url, error) =>
-                                Icon(Icons.error),
+                        Visibility(
+                          visible: isDownloaded(imageModel.id.toString())
+                              .isDownloaded,
+                          child: Center(
+                            child: CircleAvatar(
+                              backgroundColor: kPrimaryColor,
+                              child: Icon(
+                                Icons.download_done_outlined,
+                                color: Colors.green,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                      onTap: () async {
-                        Directory appDocDir =
-                            await getApplicationDocumentsDirectory();
-                        String appDocPath = appDocDir.path;
-                        final taskId = await FlutterDownloader.enqueue(
-                          url: imageListState.imageList[index].largeImageURL,
-                          headers: {
-                            "previewURL":
-                                imageListState.imageList[index].previewURL,
-                            "imageId":
-                                imageListState.imageList[index].id.toString()
-                          },
-                          savedDir: appDocPath,
-                          showNotification: true,
-                          openFileFromNotification: true,
-                        );
-                        Navigator.pushNamed(context, IMAGE_DETAIL);
-                      },
+                      ],
                     );
                   },
                 ),
@@ -124,4 +192,13 @@ class _ImageListState extends State<ImageList> {
       ),
     );
   }
+}
+
+class CheckDownloadStatus {
+  bool isDownloaded;
+  String filePath;
+  CheckDownloadStatus({
+    @required this.isDownloaded,
+    @required this.filePath,
+  });
 }

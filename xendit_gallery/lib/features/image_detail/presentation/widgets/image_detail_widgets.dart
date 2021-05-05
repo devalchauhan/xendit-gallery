@@ -8,6 +8,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:xendit_gallery/constants/colors.dart';
 import 'package:xendit_gallery/constants/strings.dart';
 import 'package:xendit_gallery/constants/text_styles.dart';
+import 'package:xendit_gallery/features/image_detail/presentation/page/image_detail.dart';
 
 class SectionHeader extends StatelessWidget {
   String groupByValue;
@@ -80,17 +81,21 @@ class SectionRow extends StatelessWidget {
                         ),
                         child: Center(
                             child: Text(
-                          'Downloaded',
+                          ImageDetail.getStatus(element.status.value)
+                              .titleStatus,
                           style: TextStyle(color: Colors.white),
                         )),
                       ),
                     ),
-                    LinearPercentIndicator(
-                      width: 140.0,
-                      lineHeight: 8.0,
-                      percent: 0.5,
-                      backgroundColor: Colors.white,
-                      progressColor: Colors.orangeAccent,
+                    Visibility(
+                      visible: element.progress == 100 ? false : true,
+                      child: LinearPercentIndicator(
+                        width: 140.0,
+                        lineHeight: 8.0,
+                        percent: element.progress.toDouble() / 100,
+                        backgroundColor: Colors.white,
+                        progressColor: Colors.orangeAccent,
+                      ),
                     )
                   ],
                 ),
