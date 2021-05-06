@@ -1,13 +1,17 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:xendit_gallery/constants/colors.dart';
 import 'package:xendit_gallery/constants/strings.dart';
+import 'package:xendit_gallery/core/downloading/download_service.dart';
+import 'package:xendit_gallery/core/usecases/usecase.dart';
 import 'package:xendit_gallery/features/image_list/data/model/image_model.dart';
 import 'package:xendit_gallery/features/image_list/domain/usecases/get_image_list.dart';
 import 'package:xendit_gallery/features/image_list/presentation/cubit/image_list_cubit.dart';
@@ -22,13 +26,29 @@ class _ImageListState extends State<ImageList> {
   ScrollController controller;
   int pageIndex = 1;
   List<DownloadTask> tasks = [];
+  List<ImageModel> _tasks = [];
+  ReceivePort _port = ReceivePort();
   @override
   void initState() {
+    Downloading.downloading.init();
     BlocProvider.of<ImageListCubit>(context)
         .callGetImageList(PageParams(page: pageIndex.toString()));
     controller = new ScrollController()..addListener(_scrollListener);
     getLocalImages();
     _checkPermission();
+    Downloading.downloading.setCallBackForList((data) {
+      if (_tasks != null && _tasks.isNotEmpty) {
+        final task = _tasks.firstWhere((task) => task.taskId == data[0]);
+        if (task != null) {
+          setState(() {
+            task.percentage = double.parse(data[2].toString());
+          });
+          if (data[2] == 100) {
+            BlocProvider.of<ImageListCubit>(context).callRefresh(NoParams());
+          }
+        }
+      }
+    });
     super.initState();
   }
 
@@ -107,18 +127,19 @@ class _ImageListState extends State<ImageList> {
               return Center(child: CircularProgressIndicator());
             }
             if (imageListState is LoadedState) {
+              _tasks = imageListState.imageList;
               return Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: GridView.builder(
                   controller: controller,
-                  itemCount: imageListState.imageList.length,
+                  itemCount: _tasks.length,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
                     crossAxisSpacing: 3,
                     mainAxisSpacing: 3,
                   ),
                   itemBuilder: (BuildContext context, int index) {
-                    ImageModel imageModel = imageListState.imageList[index];
+                    ImageModel imageModel = _tasks[index];
                     return Stack(
                       children: [
                         GestureDetector(
@@ -152,8 +173,10 @@ class _ImageListState extends State<ImageList> {
                               Directory appDocDir =
                                   await getApplicationDocumentsDirectory();
                               String appDocPath = appDocDir.path;
-                              await FlutterDownloader.enqueue(
+                              final taskId = await FlutterDownloader.enqueue(
                                 url: imageModel.largeImageURL,
+                                /*url:
+                                    'http://barbra-coco.dyndns.org/student/learning_android_studio.pdf',*/
                                 headers: {
                                   "previewURL": imageModel.previewURL,
                                   "imageId": imageModel.id.toString()
@@ -162,13 +185,16 @@ class _ImageListState extends State<ImageList> {
                                 showNotification: false,
                                 openFileFromNotification: false,
                               );
-                              //Navigator.pushNamed(context, IMAGE_DETAIL);
+                              imageModel.taskId = taskId;
                             }
                           },
                         ),
                         Visibility(
-                          visible: isDownloaded(imageModel.id.toString())
-                              .isDownloaded,
+                          visible: (isDownloaded(imageModel.id.toString())
+                                      .isDownloaded ||
+                                  imageModel.percentage == 100)
+                              ? true
+                              : false,
                           child: Center(
                             child: IgnorePointer(
                               child: CircleAvatar(
@@ -178,6 +204,20 @@ class _ImageListState extends State<ImageList> {
                                   color: Colors.green,
                                 ),
                               ),
+                            ),
+                          ),
+                        ),
+                        Visibility(
+                          visible: (imageModel.percentage == 100 ||
+                                  imageModel.percentage == 0)
+                              ? false
+                              : true,
+                          child: Center(
+                            child: CircularPercentIndicator(
+                              radius: 60.0,
+                              lineWidth: 5.0,
+                              percent: imageModel.percentage / 100,
+                              progressColor: Colors.orange,
                             ),
                           ),
                         ),

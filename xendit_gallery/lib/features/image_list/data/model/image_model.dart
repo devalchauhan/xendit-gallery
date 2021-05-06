@@ -16,17 +16,27 @@ class AllImages {
 }
 
 class ImageModel extends NetImage {
-  ImageModel(
-      {@required int id,
-      @required String previewURL,
-      @required String largeImageURL})
-      : super(id: id, previewURL: previewURL, largeImageURL: largeImageURL);
+  ImageModel({
+    @required int id,
+    @required String previewURL,
+    @required String largeImageURL,
+    @required double percentage,
+    @required String taskId,
+  }) : super(
+          id: id,
+          previewURL: previewURL,
+          largeImageURL: largeImageURL,
+          percentage: percentage,
+          taskId: taskId,
+        );
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'previewURL': previewURL,
       'largeImageURL': largeImageURL,
+      'percentage': percentage,
+      'taskId': taskId,
     };
   }
 
@@ -35,6 +45,8 @@ class ImageModel extends NetImage {
       id: json['id'],
       previewURL: json['previewURL'],
       largeImageURL: json['largeImageURL'],
+      percentage: 0.0,
+      taskId: '',
     );
   }
 }

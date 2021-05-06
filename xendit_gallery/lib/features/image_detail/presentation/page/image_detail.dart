@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:xendit_gallery/core/downloading/download_service.dart';
 import 'package:xendit_gallery/core/usecases/usecase.dart';
 import 'package:xendit_gallery/features/image_detail/presentation/cubit/image_detail_cubit.dart';
 import 'package:xendit_gallery/features/image_detail/presentation/widgets/image_detail_widgets.dart';
@@ -23,8 +24,7 @@ class ImageDetail extends StatefulWidget {
       return TaskStatus(
           progressStatus: 'Downloading', titleStatus: 'Downloading');
     } else {
-      return TaskStatus(
-          progressStatus: 'Downloading', titleStatus: 'undefined');
+      return TaskStatus(progressStatus: 'Downloading', titleStatus: 'pending');
     }
   }
 
@@ -35,63 +35,32 @@ class ImageDetail extends StatefulWidget {
 class _ImageDetailState extends State<ImageDetail> {
   List<DownloadTask> _tasks = [];
   String _localPath;
-  ReceivePort _port = ReceivePort();
   @override
   void initState() {
     BlocProvider.of<ImageDetailCubit>(context)
         .callGetImageDetailList(NoParams());
-    _bindBackgroundIsolate();
-
-    FlutterDownloader.registerCallback(downloadCallback);
-
+    Downloading.downloading.setCallBack((data) {
+      if (_tasks != null && _tasks.isNotEmpty) {
+        final task = _tasks.firstWhere((task) => task.taskId == data[0]);
+        if (task != null) {
+          setState(() {
+            task.status = data[1];
+            task.progress = data[2];
+          });
+          if (data[2] == 100) {
+            BlocProvider.of<ImageListCubit>(context).callRefresh(NoParams());
+          }
+        }
+      }
+    });
     _prepare();
     super.initState();
   }
 
   @override
   void dispose() {
-    _unbindBackgroundIsolate();
+    //Downloading.downloading.unbindBackgroundIsolate();
     super.dispose();
-  }
-
-  void _bindBackgroundIsolate() {
-    bool isSuccess = IsolateNameServer.registerPortWithName(
-        _port.sendPort, 'downloader_send_port');
-    if (!isSuccess) {
-      _unbindBackgroundIsolate();
-      _bindBackgroundIsolate();
-      return;
-    }
-    _port.listen((dynamic data) {
-      String id = data[0];
-      DownloadTaskStatus status = data[1];
-      int progress = data[2];
-
-      if (_tasks != null && _tasks.isNotEmpty) {
-        final task = _tasks.firstWhere((task) => task.taskId == id);
-        if (task != null) {
-          setState(() {
-            task.status = status;
-            task.progress = progress;
-          });
-          if (progress == 100) {
-            print('deval 100$progress');
-            BlocProvider.of<ImageListCubit>(context).callRefresh(NoParams());
-          }
-        }
-      }
-    });
-  }
-
-  void _unbindBackgroundIsolate() {
-    IsolateNameServer.removePortNameMapping('downloader_send_port');
-  }
-
-  static void downloadCallback(
-      String id, DownloadTaskStatus status, int progress) {
-    final SendPort send =
-        IsolateNameServer.lookupPortByName('downloader_send_port');
-    send.send([id, status, progress]);
   }
 
   Future<Null> _prepare() async {
