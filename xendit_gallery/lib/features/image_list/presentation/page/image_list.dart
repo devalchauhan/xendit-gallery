@@ -85,7 +85,6 @@ class _ImageListState extends State<ImageList> {
     }
   }
 
-  String localFilePath(String id) {}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -163,7 +162,7 @@ class _ImageListState extends State<ImageList> {
                                 showNotification: false,
                                 openFileFromNotification: false,
                               );
-                              Navigator.pushNamed(context, IMAGE_DETAIL);
+                              //Navigator.pushNamed(context, IMAGE_DETAIL);
                             }
                           },
                         ),
@@ -171,11 +170,13 @@ class _ImageListState extends State<ImageList> {
                           visible: isDownloaded(imageModel.id.toString())
                               .isDownloaded,
                           child: Center(
-                            child: CircleAvatar(
-                              backgroundColor: kPrimaryColor,
-                              child: Icon(
-                                Icons.download_done_outlined,
-                                color: Colors.green,
+                            child: IgnorePointer(
+                              child: CircleAvatar(
+                                backgroundColor: kPrimaryColor,
+                                child: Icon(
+                                  Icons.download_done_outlined,
+                                  color: Colors.green,
+                                ),
                               ),
                             ),
                           ),

@@ -76,7 +76,7 @@ class _ImageDetailState extends State<ImageDetail> {
           });
           if (progress == 100) {
             print('deval 100$progress');
-            //BlocProvider.of<ImageListCubit>(context).callRefresh(NoParams());
+            BlocProvider.of<ImageListCubit>(context).callRefresh(NoParams());
           }
         }
       }
